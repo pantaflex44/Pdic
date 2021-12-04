@@ -8,7 +8,7 @@
     - [Injections sélectives](#iselective)
     - [Autowiring](#iclasses)
     - [Paramètres personnels](#imethodes)
-4) [Invocation de méthodes)](#invoke)
+4) [Invocation de méthodes](#invoke)
 5) [Licence et Utilisations](#licence)
 6) [A propos](#apropos)
 
