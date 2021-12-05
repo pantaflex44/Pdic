@@ -37,7 +37,6 @@ use ReflectionMethod;
  */
 class Pdic
 {
-
     /**
      * Objects instance
      *
