@@ -8,9 +8,10 @@
     - [Injections sélectives](#iselective)
     - [Autowiring](#iclasses)
     - [Paramètres personnels](#imethodes)
-4) [Invocation de méthodes](#invoke)
-5) [Licence et Utilisations](#licence)
-6) [A propos](#apropos)
+4) [Définitions des paramètres personnels](#parametres)
+5) [Invocation de méthodes](#invoke)
+6) [Licence et Utilisations](#licence)
+7) [A propos](#apropos)
 
 <br>
 
@@ -134,7 +135,7 @@ Pour celà, je vous propose une toute petite librairie PHP, très simple d'utili
 
 Encore une fois, simplicité est maitre mot.
 
-Copiez/Collez le dossier *'pdic'* et son contenu dans le dossier de votre choix (par exemple: *'libs'*) au niveau de votre applications. Puis, dans le script principal de celle-ci, intégrez **@PDic** comme suit:
+Copiez/Collez le dossier *'pdic'* et son contenu dans le dossier de votre choix (par exemple: *'libs'*) au niveau de votre applications. Puis, dans le script principal de celle-ci, intégrez **@Pdic** comme suit:
 
 ```php
 <?php
@@ -435,7 +436,7 @@ $response->send("message to render");
 
 Le constructeur prend un nouvel argument *$commonParam*.
 
-Si nous executons le code tel quel, PHP vient à nous répréhender:
+Si nous executons le code tel quel, PHP vient nous répréhender:
 
 ```
 Fatal error: Uncaught Exception: Unknown param `commonParam` in /home/christophe/OneDrive/Documents/Projets/Php/Framel/libs/pdic/pdic.inc.php:177 Stack trace: #0 /home/christophe/OneDrive/Documents/Projets/Php/Framel/libs/pdic/pdic.inc.php(251): Framel\Libs\Pdic\Pdic::resolve() #1 /home/christophe/OneDrive/Documents/Projets/Php/Framel/libs/pdic/pdic.inc.php(287): Framel\Libs\Pdic\Pdic::instanciate() #2 /home/christophe/OneDrive/Documents/Projets/Php/Framel/framel.php(64): Framel\Libs\Pdic\Pdic::get() #3 {main} thrown in /home/christophe/OneDrive/Documents/Projets/Php/Framel/libs/pdic/pdic.inc.php on line 177
@@ -463,11 +464,70 @@ Nous pouvons traduire les lignes ci-dessus par:
 
 <br>
 
+<a name="parametres"></a>
+
+## Définitions des paramètres personnels
+
+Plus haut, je vous ai expliqué comment définir les paramètres personnels pour les méthodes d'instanciation et d'invocation. Nous passions directement comme argument de ces méthodes, un tableau contenant les informations personnelles à injecter.
+
+Mais cette solution implique d'injecter ces paramètres à chaque fois que l'on peut en avoir besoin. 
+
+Si dans votre code, vous ayez besoin ou soyez obligés de définir ces paramètres personnels en amont, **@Pdic** vous propose une nouvelle fois un outil bien pratique: **Le stockage des paramètres**.
+
+```php
+public static function setParameters(string $class, array $parameters): void
+```
+
+Cette fonction prend 2 arguments:
+- ***$class*** 
+    - Classe / Objet qui sera concerné par les paramètres
+- ***$parameters*** 
+    - Tableau associatif contenant les méthodes concernées et leurs paramètres, découpé comme suit:
+        ```php
+        [
+            'nom de la méthode1' => [
+                'nom du parametre1' => 'sa valeur',
+                'nom du parametre2' => 'sa valeur',
+            ],
+            'nom de la méthode2' => [
+                'nom du parametre1' => 'sa valeur',
+                'nom du parametre2' => 'sa valeur',
+            ],
+        ]
+        ```
+
+Pour exemple nous pourrions avoir:
+
+```php
+class MyClass1 {
+
+    public function myMethod1(string $theParam) {
+
+    }
+
+    public function myMethod2(string $theOtherOrSameParam) {
+        
+    }
+
+}
+
+Pdic::setParameters(MyClass1::class, [
+    'myMethod1' => [
+        'theParam' => 'the first value',
+    ],
+    'myMethod2' => [
+        'theOtherOrSameParam' => 'the second value',
+    ],
+]);
+```
+
+<br>
+
 <a name="invoke"></a>
 
 ## Invocation de méthodes
 
-Depuis le début nous voyons comment utiliser les classes et leurs instanciations. Mais parfois, une classe ne possède pas de constructeurs! **@Pdic** y a pensé et propose sa solution: *Pdic::invokde()*
+Depuis le début nous voyons comment utiliser les classes et leurs instanciations. Mais parfois, une classe ne possède pas de constructeur! **@Pdic** y a pensé et propose sa solution: *Pdic::invokde()*
 
 ```
 public static function invoke(string $class, string $methodName, array $methodParams = [])
@@ -542,22 +602,26 @@ class MyController1
 
 // préparation des injections
 
-Pdic::setDefinition(Response::class, '*', [Renderer::class => new HtmlRenderer()]);
-Pdic::setDefinition(MyController1::class, 'home', [Engine::class => new Engine("i'm the home engine")]);
-Pdic::setDefinition(MyController1::class, 'contact', [Engine::class => new Engine("i'm the contact engine")]);
+Pdic::setDefinition(Response::class, '*', [
+    Renderer::class => new HtmlRenderer()
+]);
 
-$myController1Params = [
-    MyController1::class =>
-    [
-        'home' => ['title' => 'page home'],
-        'contact' => ['title' => 'page contact']
-    ],
-];
+Pdic::setDefinition(MyController1::class, 'home', [
+    Engine::class => new Engine("i'm the home engine")
+]);
+Pdic::setDefinition(MyController1::class, 'contact', [
+    Engine::class => new Engine("i'm the contact engine")
+]);
+
+Pdic::setParameters(MyController1::class, [
+    'home' => ['title' => 'page home'],
+    'contact' => ['title' => 'page contact']
+]);
 
 // puis au moment venu, appelons les différents *Controllers*
 
-Pdic::invoke(MyController1::class, 'home', $myController1Params);
-Pdic::invoke(MyController1::class, 'contact', $myController1Params);
+Pdic::invoke(MyController1::class, 'home');
+Pdic::invoke(MyController1::class, 'contact');
 
 // var_dump
 // --------

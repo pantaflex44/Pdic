@@ -46,6 +46,57 @@ class Pdic
     protected static $instances = [];
 
     /**
+     * Set parameters
+     *
+     * @param string $class Class name
+     * @param array $parameters Array of parameters ( [ methodName => [ key => value , ... ] , ... ] )
+     * @return void
+     */
+    public static function setParameters(string $class, array $parameters): void
+    {
+        if (
+            !array_key_exists(self::class, $GLOBALS)
+            || !is_array($GLOBALS[self::class])
+        ) {
+            $GLOBALS[self::class] = [];
+        }
+
+        if (
+            !array_key_exists($class, $GLOBALS[self::class])
+            || !is_array($GLOBALS[self::class][$class])
+        ) {
+            $GLOBALS[self::class][$class] = [];
+        }
+
+        $GLOBALS[self::class][$class] += $parameters;
+    }
+
+    /**
+     * Get parameters
+     *
+     * @param string $class Class name
+     * @return array Array of parameters ( [ methodName => [ key => value , ... ] , ... ] )
+     */
+    public static function getParameters(string $class): array
+    {
+        if (
+            !array_key_exists(self::class, $GLOBALS)
+            || !is_array($GLOBALS[self::class])
+        ) {
+            return [];
+        }
+
+        if (
+            !array_key_exists($class, $GLOBALS[self::class])
+            || !is_array($GLOBALS[self::class][$class])
+        ) {
+            return [];
+        }
+
+        return $GLOBALS[self::class][$class];
+    }
+
+    /**
      * Has a definition
      *
      * @param string $class Class name
@@ -160,7 +211,8 @@ class Pdic
 
         $className = $method->getDeclaringClass()->getName();
         $methodName = $method->getName();
-        $a = 0;
+
+        $methodParams += [$className => self::getParameters($className)];
 
         $nip = [];
         foreach ($params as $param) {
@@ -248,6 +300,9 @@ class Pdic
             return $rc->newInstance();
         }
 
+        $class = $rc->getName();
+        $methodParams += [$class => self::getParameters($class)];
+
         if (($params = self::resolve($ctor, $methodParams)) === []) {
             return $rc->newInstance();
         }
@@ -268,6 +323,8 @@ class Pdic
             return null;
         }
 
+        $methodParams += [$class => self::getParameters($class)];
+
         if (($params = self::resolve($rm, $methodParams)) === []) {
             return $rm->invoke(self::get($class, $methodParams));
         }
@@ -283,6 +340,8 @@ class Pdic
      */
     public static function get(string $class, array $methodParams = []): ?object
     {
+        $methodParams += [$class => self::getParameters($class)];
+
         if (!array_key_exists($class, self::$instances)) {
             self::$instances[$class] = self::instanciate($class, $methodParams);
         }
