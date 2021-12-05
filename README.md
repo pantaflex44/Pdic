@@ -8,7 +8,7 @@
     - [Injections sélectives](#iselective)
     - [Autowiring](#iclasses)
     - [Paramètres personnels](#imethodes)
-4) [Définitions des paramètres personnels](#parametres)
+4) [Stockage des paramètres personnels](#parametres)
 5) [Invocation de méthodes](#invoke)
 6) [Licence et Utilisations](#licence)
 7) [A propos](#apropos)
@@ -466,7 +466,7 @@ Nous pouvons traduire les lignes ci-dessus par:
 
 <a name="parametres"></a>
 
-## Définitions des paramètres personnels
+## Stockage des paramètres personnels
 
 Plus haut, je vous ai expliqué comment définir les paramètres personnels pour les méthodes d'instanciation et d'invocation. Nous passions directement comme argument de ces méthodes, un tableau contenant les informations personnelles à injecter.
 
