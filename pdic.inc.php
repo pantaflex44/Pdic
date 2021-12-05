@@ -61,13 +61,20 @@ class Pdic
         }
 
         if (
-            !array_key_exists($class, $GLOBALS[self::class])
-            || !is_array($GLOBALS[self::class][$class])
+            !array_key_exists('_params', $GLOBALS[self::class])
+            || !is_array($GLOBALS[self::class]['_params'])
         ) {
-            $GLOBALS[self::class][$class] = [];
+            $GLOBALS[self::class]['_params'] = [];
         }
 
-        $GLOBALS[self::class][$class] += $parameters;
+        if (
+            !array_key_exists($class, $GLOBALS[self::class]['_params'])
+            || !is_array($GLOBALS[self::class]['_params'][$class])
+        ) {
+            $GLOBALS[self::class]['_params'][$class] = [];
+        }
+
+        $GLOBALS[self::class]['_params'][$class] += $parameters;
     }
 
     /**
@@ -86,13 +93,20 @@ class Pdic
         }
 
         if (
-            !array_key_exists($class, $GLOBALS[self::class])
-            || !is_array($GLOBALS[self::class][$class])
+            !array_key_exists('_params', $GLOBALS[self::class])
+            || !is_array($GLOBALS[self::class]['_params'])
         ) {
             return [];
         }
 
-        return $GLOBALS[self::class][$class];
+        if (
+            !array_key_exists($class, $GLOBALS[self::class]['_params'])
+            || !is_array($GLOBALS[self::class]['_params'][$class])
+        ) {
+            return [];
+        }
+
+        return $GLOBALS[self::class]['_params'][$class];
     }
 
     /**
